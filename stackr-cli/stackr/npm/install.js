@@ -1,11 +1,11 @@
-const { execSync } = require('child_process')
-const https = require('https')
 const fs = require('fs')
 const path = require('path')
 const os = require('os')
+const https = require('https')
 
 const VERSION = '1.2.0'
-const BASE_URL = `https://github.com/stackr-lat/cli/releases/download/v${VERSION}`
+const REPO = 'EduardoxDev/Stackr-CLI'
+const BASE_URL = `https://github.com/${REPO}/releases/download/v${VERSION}`
 
 function getBinaryName() {
   const platform = os.platform()
@@ -15,40 +15,92 @@ function getBinaryName() {
   return arch === 'arm64' ? 'stackr-linux-arm64' : 'stackr-linux-amd64'
 }
 
-function download(url, dest) {
+function getDestName() {
+  return os.platform() === 'win32' ? 'stackr.exe' : 'stackr'
+}
+
+function download(url, dest, redirects) {
+  redirects = redirects || 0
+  if (redirects > 10) {
+    throw new Error('Muitos redirecionamentos')
+  }
+
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(dest)
-    https.get(url, (res) => {
-      if (res.statusCode === 302 || res.statusCode === 301) {
+
+    https.get(url, { headers: { 'User-Agent': 'stackr-installer' } }, (res) => {
+      // Seguir redirecionamentos (301, 302, 307, 308)
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         file.close()
-        return download(res.headers.location, dest).then(resolve).catch(reject)
+        fs.unlink(dest, () => {})
+        return resolve(download(res.headers.location, dest, redirects + 1))
       }
+
+      if (res.statusCode !== 200) {
+        file.close()
+        fs.unlink(dest, () => {})
+        return reject(new Error(`HTTP ${res.statusCode} ao baixar ${url}`))
+      }
+
+      const total = parseInt(res.headers['content-length'] || '0', 10)
+      let downloaded = 0
+
+      res.on('data', (chunk) => {
+        downloaded += chunk.length
+        if (total > 0) {
+          const pct = Math.round((downloaded / total) * 100)
+          process.stdout.write(`\r  Baixando... ${pct}%`)
+        }
+      })
+
       res.pipe(file)
-      file.on('finish', () => { file.close(); resolve() })
-    }).on('error', (err) => { fs.unlink(dest, () => {}); reject(err) })
+
+      file.on('finish', () => {
+        process.stdout.write('\n')
+        file.close(resolve)
+      })
+
+      file.on('error', (err) => {
+        fs.unlink(dest, () => {})
+        reject(err)
+      })
+    }).on('error', (err) => {
+      fs.unlink(dest, () => {})
+      reject(err)
+    })
   })
 }
 
 async function main() {
   const binaryName = getBinaryName()
+  const destName = getDestName()
   const url = `${BASE_URL}/${binaryName}`
   const binDir = path.join(__dirname, 'bin')
-  const dest = path.join(binDir, os.platform() === 'win32' ? 'stackr.exe' : 'stackr')
+  const dest = path.join(binDir, destName)
 
   fs.mkdirSync(binDir, { recursive: true })
 
-  process.stdout.write(`  Baixando stackr CLI v${VERSION}...\n`)
-  await download(url, dest)
+  process.stdout.write(`\n  Baixando stackr CLI v${VERSION}...\n`)
 
-  if (os.platform() !== 'win32') {
-    fs.chmodSync(dest, 0o755)
+  try {
+    await download(url, dest)
+
+    if (os.platform() !== 'win32') {
+      fs.chmodSync(dest, 0o755)
+    }
+
+    const size = fs.statSync(dest).size
+    if (size < 1000) {
+      throw new Error('Arquivo muito pequeno — download falhou. Tente novamente ou baixe manualmente.')
+    }
+
+    process.stdout.write(`  ✔  stackr CLI instalado com sucesso! (${Math.round(size / 1024 / 1024)}MB)\n`)
+    process.stdout.write(`  >>  Execute: stackr login <SEU_TOKEN>\n\n`)
+  } catch (err) {
+    process.stderr.write(`\n  ERRO: ${err.message}\n`)
+    process.stderr.write(`  Baixe manualmente: https://github.com/${REPO}/releases\n\n`)
+    process.exit(1)
   }
-
-  process.stdout.write(`  ✔ stackr CLI instalado com sucesso!\n`)
-  process.stdout.write(`  → Execute: stackr login <SEU_TOKEN>\n\n`)
 }
 
-main().catch((err) => {
-  console.error('Erro na instalação:', err.message)
-  process.exit(1)
-})
+main()
