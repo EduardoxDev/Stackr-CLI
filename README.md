@@ -20,13 +20,13 @@
 
 ---
 
-## ✨ O que é o Stackr CLI?
+##  O que é o Stackr CLI?
 
 O **Stackr CLI** é a interface de linha de comando oficial da plataforma Stackr. Com ele você gerencia seus apps, faz deploys, acompanha logs e muito mais — tudo direto do terminal, sem precisar abrir o painel.
 
 ---
 
-## ⚡ Instalação
+##  Instalação
 
 > Requisito: [Node.js](https://nodejs.org) v16 ou superior
 
@@ -46,7 +46,7 @@ Isso é tudo. O instalador detecta seu sistema e baixa o binário correto automa
 
 ---
 
-## 🔐 Autenticação
+##  Autenticação
 
 Após instalar, faça login com seu token da Stackr:
 
@@ -58,7 +58,7 @@ Seu token é salvo localmente em `~/.stackr/config.json` e usado automaticamente
 
 ---
 
-## 🚀 Comandos
+##  Comandos
 
 ### Apps
 
@@ -104,7 +104,7 @@ stackr apps --help
 
 ---
 
-## 💡 Exemplo de uso
+##  Exemplo de uso
 
 ```bash
 # 1. Instale a CLI
@@ -128,7 +128,7 @@ stackr deploy
 
 ---
 
-## 🛠️ Problemas comuns
+##  Problemas comuns
 
 ### `stackr` não é reconhecido como comando (Windows)
 
@@ -141,7 +141,7 @@ setx PATH "%PATH%;%APPDATA%\npm"
 ### Erro de download na instalação
 
 Se o instalador falhar ao baixar o binário, baixe manualmente em:
-👉 [github.com/EduardoxDev/Stackr-CLI/releases](https://github.com/EduardoxDev/Stackr-CLI/releases)
+ [github.com/EduardoxDev/Stackr-CLI/releases](https://github.com/EduardoxDev/Stackr-CLI/releases)
 
 Coloque o arquivo em:
 ```
@@ -159,7 +159,7 @@ npm install -g stackr-lat
 
 ---
 
-## 📦 Sobre
+##  Sobre
 
 - **Versão atual:** `v1.2.0`
 - **Plataforma:** [stackr.lat](https://stackr.lat)
@@ -168,6 +168,6 @@ npm install -g stackr-lat
 
 ---
 
-## 📄 Licença
+##  Licença
 
 MIT © [Stackr](https://stackr.lat)
