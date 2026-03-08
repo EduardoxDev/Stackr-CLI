@@ -1,0 +1,22 @@
+{
+  "name": "stackr-cli",
+  "version": "1.2.0",
+  "description": "CLI oficial da plataforma Stackr",
+  "bin": {
+    "stackr": "./bin/stackr.js"
+  },
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "files": [
+    "bin/",
+    "install.js"
+  ],
+  "keywords": ["stackr", "cli", "deploy", "cloud"],
+  "author": "Stackr <dev@stackr.lat>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stackr-lat/cli"
+  }
+}
